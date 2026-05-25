@@ -1,0 +1,64 @@
+openapi: 3.0.0
+info:
+  title: HTTP to WebSocket bridge
+  version: 1.0.0
+x-yc-apigateway:
+  variables:
+    backend_url:
+      default: "http://127.0.0.1:8080/ws"
+paths:
+  /ws:
+    x-yc-apigateway-websocket-connect:
+      summary: Open upstream WebSocket session
+      operationId: websocketConnect
+      responses:
+        "204":
+          description: Upstream connection created
+      x-yc-apigateway-integration:
+        type: http
+        method: POST
+        url: "${var.backend_url}"
+        headers:
+          "*": "*"
+        omitEmptyHeaders: true
+
+    x-yc-apigateway-websocket-message:
+      summary: Forward message to upstream WebSocket
+      operationId: websocketMessage
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: string
+          text/plain:
+            schema:
+              type: string
+          application/octet-stream:
+            schema:
+              type: string
+              format: binary
+      responses:
+        "204":
+          description: Message accepted by bridge
+      x-yc-apigateway-integration:
+        type: http
+        method: POST
+        url: "${var.backend_url}"
+        headers:
+          "*": "*"
+        omitEmptyHeaders: true
+
+    x-yc-apigateway-websocket-disconnect:
+      summary: Close upstream WebSocket session
+      operationId: websocketDisconnect
+      responses:
+        "204":
+          description: Upstream connection closed
+      x-yc-apigateway-integration:
+        type: http
+        method: POST
+        url: "${var.backend_url}"
+        headers:
+          "*": "*"
+        omitEmptyHeaders: true
